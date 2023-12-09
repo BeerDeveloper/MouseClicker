@@ -1,6 +1,6 @@
 ﻿namespace MouseClicker
 {
-    partial class Form1
+    partial class MouseClickerForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MouseClickerForm));
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             RecordMacroButton = new Button();
             OutputTextBox = new RichTextBox();
@@ -159,7 +159,7 @@
             StopMacroButton.Text = "Stop Macro (S)";
             StopMacroButton.UseVisualStyleBackColor = true;
             // 
-            // Form1
+            // MouseClickerForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -175,9 +175,10 @@
             Controls.Add(OutputTextBox);
             Controls.Add(RecordMacroButton);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             MaximumSize = new Size(816, 489);
-            Name = "Form1";
+            Name = "MouseClickerForm";
             SizeGripStyle = SizeGripStyle.Hide;
             Text = "MouseClicker";
             ((System.ComponentModel.ISupportInitialize)RecordOffPicture).EndInit();

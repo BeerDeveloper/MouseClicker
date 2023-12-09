@@ -3,12 +3,12 @@ using System.ComponentModel;
 
 namespace MouseClicker
 {
-    public partial class Form1 : Form
+    public partial class MouseClickerForm : Form
     {
         private MacroRecorder macroRecorder;
         private MacroRunner macroRunner;
 
-        public Form1()
+        public MouseClickerForm()
         {
             InitializeComponent();
 
@@ -62,17 +62,17 @@ namespace MouseClicker
 
         private void OnStartMacroButtonPressed(object sender, System.EventArgs e)
         {
-            if(!macroRecorder.isRecording)
+            if (!macroRecorder.isRecording)
             {
-                Log("Macro has started looping: you can stop it by either clicking on Stop Macro or by pressing the S key");
-                macroRunner.Start();
+                if (macroRunner.Start())
+                    Log("Macro has started looping: you can stop it by either clicking on Stop Macro or by pressing the S key");
             }
         }
 
         private void OnStopMacroButtonPressed(object sender, System.EventArgs e)
         {
             macroRunner.Stop();
-            if(macroRunner.isRunning)
+            if (macroRunner.isRunning)
                 Log("Macro has stopped");
         }
 
@@ -152,9 +152,10 @@ namespace MouseClicker
             LoadedMacroDataTextBox.Text = macro.ToString();
         }
 
-        private void Log(string message)
+        public void Log(string message)
         {
-            OutputTextBox.Text = message + "\n" + OutputTextBox.Text;
+            string time = "[" + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second + "]";
+            OutputTextBox.Text = time + " - " + message + "\n\n" + OutputTextBox.Text;
         }
 
         private void startAsyncButton_Click(object sender, EventArgs e)

@@ -34,21 +34,27 @@
             return false;
         }
 
-        public void Start()
+        public bool Start()
         {
             lock(mutex)
             {
                 if (loadedMacro is not null)
                 {
-                    macroExecutionTask = Task.Run(_Execute);
-                    isRunning = true;
+                    if (loadedMacro.GetPoints().Length > 0)
+                    {
+                        macroExecutionTask = Task.Run(_Execute);
+                        isRunning = true;
+                        return true;
+                    }
                 }
                 else
                     throw new NullReferenceException("MacroRunner: no macro loaded");
             }
+
+            return false;
         }
 
-        public void Stop()
+        public bool Stop()
         {
             lock(mutex)
             {
@@ -59,9 +65,12 @@
                     {
                         macroExecutionTask.Wait();
                         macroExecutionTask = null;
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
 
         private void _Execute()
@@ -93,7 +102,8 @@
                     if(isRunning)
                     {
                         Thread.Sleep((int)timedPoint.milliseconds);
-                        this.mouseHandler.Click(timedPoint.point);
+                        if(isRunning)
+                            this.mouseHandler.Click(timedPoint.point);
                     }
                 }
             }
