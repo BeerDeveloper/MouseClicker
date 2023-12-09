@@ -1,6 +1,6 @@
 ﻿namespace MouseClicker.cs
 {
-    public static class MacroManager
+    public static class MacroFileManager
     {
         public static string SaveMacroToFile(Macro macro)
         {

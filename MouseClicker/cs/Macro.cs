@@ -66,5 +66,27 @@ namespace MouseClicker.cs
                 return false;
             }
         }
+
+        public override string ToString()
+        {
+            string macroDesc = "";
+
+            if(this.points.Count > 0)
+            {
+                macroDesc += "-------------------------\n";
+                int i = 1;
+
+                foreach (TimedPoint timedPoint in this.points)
+                {
+
+                    macroDesc += "Point " + i++ + "\n";
+                    macroDesc += "X: " + timedPoint.point.X + " - Y: " + timedPoint.point.Y + "\n";
+                    macroDesc += "Delay: " + timedPoint.milliseconds + " milliseconds" + "\n";
+                    macroDesc += "-------------------------\n";
+                }
+            }
+
+            return macroDesc;
+        }
     }
 }

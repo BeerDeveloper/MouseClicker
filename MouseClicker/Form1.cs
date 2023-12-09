@@ -1,24 +1,25 @@
 using MouseClicker.cs;
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace MouseClicker
 {
     public partial class Form1 : Form
     {
         private MacroRecorder macroRecorder;
-        private Macro? loadedMacro;
+        private MacroRunner macroRunner;
 
         public Form1()
         {
             InitializeComponent();
 
             macroRecorder = new MacroRecorder();
-            loadedMacro = null;
+            macroRunner = new MacroRunner();
 
             backgroundWorker1.WorkerReportsProgress = true;
             backgroundWorker1.WorkerSupportsCancellation = true;
 
+            StartMacroButton.Click += OnStartMacroButtonPressed;
+            StopMacroButton.Click += OnStopMacroButtonPressed;
             RecordMacroButton.Click += OnRecordMacroButtonPressed;
             BrowseButton.Click += OnBrowseButtonClick;
 
@@ -59,64 +60,96 @@ namespace MouseClicker
             }*/
         }
 
+        private void OnStartMacroButtonPressed(object sender, System.EventArgs e)
+        {
+            if(!macroRecorder.isRecording)
+            {
+                Log("Macro has started looping: you can stop it by either clicking on Stop Macro or by pressing the S key");
+                macroRunner.Start();
+            }
+        }
+
+        private void OnStopMacroButtonPressed(object sender, System.EventArgs e)
+        {
+            macroRunner.Stop();
+            if(macroRunner.isRunning)
+                Log("Macro has stopped");
+        }
+
         private void OnRecordMacroButtonPressed(object sender, System.EventArgs e)
         {
-            if (macroRecorder.isRecording)
+            if (!macroRunner.isRunning)
             {
-                Macro? macro = macroRecorder.StopRecording();
-
-                if (macro is not null)
+                if (macroRecorder.isRecording)
                 {
-                    string macroName;
+                    Macro? macro = macroRecorder.StopRecording();
 
-                    SaveMacroDialog.ShowDialog();
-
-                    macroName = SaveMacroDialog.FileName;
-                    macro.name = macroName;
-
-                    if ((macroName = MacroManager.SaveMacroToFile(macro)) != "")
+                    if (macro is not null)
                     {
-                        loadedMacro = macro;
-                        LoadedMacroTextBox.Text = loadedMacro.name;
-                        Log("Saved macro as " + macroName);
+                        DialogResult dialogResult = SaveMacroDialog.ShowDialog();
+                        if (dialogResult == DialogResult.OK)
+                        {
+                            string macroName;
+
+                            macroName = SaveMacroDialog.FileName;
+                            macro.name = macroName;
+
+                            if ((macroName = MacroFileManager.SaveMacroToFile(macro)) != "")
+                            {
+                                SetLoadedMacro(macro);
+                                Log("Saved macro as " + macroName);
+                            }
+                            else
+                                Log("Macro has been discarded");
+                        }
                     }
                     else
-                        Log("Macro has been discarded");
+                    {
+                        Log("Macro is empty");
+                    }
+
+                    OutputTextBox.Refresh();
+                    RecordMacroButton.Text = "Start recording";
+                    RecordOffPicture.Show();
+                    RecordOnPicture.Hide();
                 }
                 else
                 {
-                    Log("Macro is empty");
+                    macroRecorder.StartRecording();
+                    RecordMacroButton.Text = "Stop recording";
+                    RecordOffPicture.Hide();
+                    RecordOnPicture.Show();
                 }
-
-                OutputTextBox.Refresh();
-                RecordMacroButton.Text = "Start recording";
-                RecordOffPicture.Show();
-                RecordOnPicture.Hide();
-            }
-            else
-            {
-                macroRecorder.StartRecording();
-                RecordMacroButton.Text = "Stop recording";
-                RecordOffPicture.Hide();
-                RecordOnPicture.Show();
             }
         }
 
         private void OnBrowseButtonClick(object sender, System.EventArgs e)
         {
-            LoadMacroDialog.ShowDialog();
-
-            loadedMacro = MacroManager.LoadMacroFromFile(LoadMacroDialog.FileName);
-
-            if (loadedMacro is not null)
+            if (!macroRunner.isRunning && !macroRecorder.isRecording)
             {
-                LoadedMacroTextBox.Text = loadedMacro.name;
-                Log("Loaded macro " + loadedMacro.name);
+                DialogResult dialogResult = LoadMacroDialog.ShowDialog();
+                if (dialogResult == DialogResult.OK)
+                {
+                    Macro? macro = MacroFileManager.LoadMacroFromFile(LoadMacroDialog.FileName);
+
+                    if (macro is not null)
+                    {
+                        SetLoadedMacro(macro);
+                        Log("Loaded macro " + macro.name);
+                    }
+                    else
+                    {
+                        Log("Unable to load macro");
+                    }
+                }
             }
-            else
-            {
-                Log("Unable to load macro");
-            }
+        }
+
+        private void SetLoadedMacro(Macro macro)
+        {
+            this.macroRunner.LoadNewMacro(macro);
+            LoadedMacroPathTextBox.Text = macro.name;
+            LoadedMacroDataTextBox.Text = macro.ToString();
         }
 
         private void Log(string message)
