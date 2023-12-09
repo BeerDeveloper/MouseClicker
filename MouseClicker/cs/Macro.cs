@@ -4,7 +4,7 @@ namespace MouseClicker.cs
 {
     public class Macro
     {
-        public string name { get; private set; }
+        public string name;
         private List<TimedPoint> points;
 
         public Macro()
@@ -15,13 +15,7 @@ namespace MouseClicker.cs
 
         public Macro(string name)
         {
-            string cleanedName = StringCleaner.CleanString(name);
-
-            if (cleanedName != "")
-                this.name = cleanedName;
-            else
-                this.name = "NewMacro";
-
+            this.name = name;
             this.points = new List<TimedPoint>();
         }
 
@@ -46,7 +40,7 @@ namespace MouseClicker.cs
 
         public string ToJSON()
         {
-            return JsonConvert.SerializeObject(points);
+            return JsonConvert.SerializeObject(points, Formatting.Indented);
         }
 
         public bool LoadFromJSON(string jsonString)

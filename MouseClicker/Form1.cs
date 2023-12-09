@@ -6,30 +6,32 @@ namespace MouseClicker
 {
     public partial class Form1 : Form
     {
-        private List<TimedPoint> clickedPoints;
-        private object mutex;
+        private MacroRecorder macroRecorder;
+        private Macro? loadedMacro;
 
         public Form1()
         {
             InitializeComponent();
 
-            clickedPoints = new List<TimedPoint>();
-            mutex = new object();
+            macroRecorder = new MacroRecorder();
+            loadedMacro = null;
 
             backgroundWorker1.WorkerReportsProgress = true;
             backgroundWorker1.WorkerSupportsCancellation = true;
 
-            RefreshListButton.Click += onListRefreshButtonPressed;
+            RecordMacroButton.Click += OnRecordMacroButtonPressed;
+            BrowseButton.Click += OnBrowseButtonClick;
 
-            Task.Run(getClickedPoints);
+            Task.Run(GetClickedPoints);
 
             //backgroundWorker1.DoWork += new DoWorkEventHandler(backgroundWorker1_DoWork);
 
             //backgroundWorker1.RunWorkerAsync();
         }
 
-        private Point getClickedPoints()
+        private void GetClickedPoints()
         {
+            /*
             MouseHandler mouseHandler = new MouseHandler();
             Stopwatch stopwatch = new Stopwatch();
             long elapsedTime = 0;
@@ -47,42 +49,79 @@ namespace MouseClicker
 
                     Console.WriteLine(mouseHandler.GetCursorPosition());
 
-                    lock (mutex)
-                    {
-                        TimedPoint timedPoint;
-                        timedPoint.point = mouseHandler.GetCursorPosition();
-                        timedPoint.milliseconds = elapsedTime;
-                        
-                        clickedPoints.Add(timedPoint);
-                    }
+
+                    TimedPoint timedPoint;
+                    timedPoint.point = mouseHandler.GetCursorPosition();
+                    timedPoint.milliseconds = elapsedTime;
 
                     stopwatch.Start();
                 }
+            }*/
+        }
+
+        private void OnRecordMacroButtonPressed(object sender, System.EventArgs e)
+        {
+            if (macroRecorder.isRecording)
+            {
+                Macro? macro = macroRecorder.StopRecording();
+
+                if (macro is not null)
+                {
+                    string macroName;
+
+                    SaveMacroDialog.ShowDialog();
+
+                    macroName = SaveMacroDialog.FileName;
+                    macro.name = macroName;
+
+                    if ((macroName = MacroManager.SaveMacroToFile(macro)) != "")
+                    {
+                        loadedMacro = macro;
+                        LoadedMacroTextBox.Text = loadedMacro.name;
+                        Log("Saved macro as " + macroName);
+                    }
+                    else
+                        Log("Macro has been discarded");
+                }
+                else
+                {
+                    Log("Macro is empty");
+                }
+
+                OutputTextBox.Refresh();
+                RecordMacroButton.Text = "Start recording";
+                RecordOffPicture.Show();
+                RecordOnPicture.Hide();
+            }
+            else
+            {
+                macroRecorder.StartRecording();
+                RecordMacroButton.Text = "Stop recording";
+                RecordOffPicture.Hide();
+                RecordOnPicture.Show();
             }
         }
 
-        private void onListRefreshButtonPressed(object sender, System.EventArgs e)
+        private void OnBrowseButtonClick(object sender, System.EventArgs e)
         {
-            Macro macro = new Macro();
+            LoadMacroDialog.ShowDialog();
 
-            lock (mutex)
+            loadedMacro = MacroManager.LoadMacroFromFile(LoadMacroDialog.FileName);
+
+            if (loadedMacro is not null)
             {
-                foreach (TimedPoint point in clickedPoints)
-                {
-                    macro.AddPoint(point);
-                }
-
-                string macroName;
-
-                if ((macroName = MacroManager.SaveMacroToFile(macro)) != "")
-                    OutputTextBox.Text = "Saved macro " + macroName ;
-                else
-                    OutputTextBox.Text = "Failed to save macro";
-
-                clickedPoints.Clear();
+                LoadedMacroTextBox.Text = loadedMacro.name;
+                Log("Loaded macro " + loadedMacro.name);
             }
+            else
+            {
+                Log("Unable to load macro");
+            }
+        }
 
-            OutputTextBox.Refresh();
+        private void Log(string message)
+        {
+            OutputTextBox.Text = message + "\n" + OutputTextBox.Text;
         }
 
         private void startAsyncButton_Click(object sender, EventArgs e)
