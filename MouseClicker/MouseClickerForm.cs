@@ -15,49 +15,10 @@ namespace MouseClicker
             macroRecorder = new MacroRecorder();
             macroRunner = new MacroRunner();
 
-            backgroundWorker1.WorkerReportsProgress = true;
-            backgroundWorker1.WorkerSupportsCancellation = true;
-
             StartMacroButton.Click += OnStartMacroButtonPressed;
             StopMacroButton.Click += OnStopMacroButtonPressed;
             RecordMacroButton.Click += OnRecordMacroButtonPressed;
             BrowseButton.Click += OnBrowseButtonClick;
-
-            Task.Run(GetClickedPoints);
-
-            //backgroundWorker1.DoWork += new DoWorkEventHandler(backgroundWorker1_DoWork);
-
-            //backgroundWorker1.RunWorkerAsync();
-        }
-
-        private void GetClickedPoints()
-        {
-            /*
-            MouseHandler mouseHandler = new MouseHandler();
-            Stopwatch stopwatch = new Stopwatch();
-            long elapsedTime = 0;
-
-            stopwatch.Start();
-
-            while (true)
-            {
-                if (mouseHandler.GetLeftMousePressed())
-                {
-                    stopwatch.Stop();
-
-                    elapsedTime = stopwatch.ElapsedMilliseconds;
-                    stopwatch.Reset();
-
-                    Console.WriteLine(mouseHandler.GetCursorPosition());
-
-
-                    TimedPoint timedPoint;
-                    timedPoint.point = mouseHandler.GetCursorPosition();
-                    timedPoint.milliseconds = elapsedTime;
-
-                    stopwatch.Start();
-                }
-            }*/
         }
 
         private void OnStartMacroButtonPressed(object sender, System.EventArgs e)
@@ -72,8 +33,6 @@ namespace MouseClicker
         private void OnStopMacroButtonPressed(object sender, System.EventArgs e)
         {
             macroRunner.Stop();
-            if (macroRunner.isRunning)
-                Log("Macro has stopped");
         }
 
         private void OnRecordMacroButtonPressed(object sender, System.EventArgs e)
@@ -156,75 +115,6 @@ namespace MouseClicker
         {
             string time = "[" + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second + "]";
             OutputTextBox.Text = time + " - " + message + "\n\n" + OutputTextBox.Text;
-        }
-
-        private void startAsyncButton_Click(object sender, EventArgs e)
-        {
-            if (backgroundWorker1.IsBusy != true)
-            {
-                // Start the asynchronous operation.
-                backgroundWorker1.RunWorkerAsync();
-            }
-        }
-
-        private void cancelAsyncButton_Click(object sender, EventArgs e)
-        {
-            if (backgroundWorker1.WorkerSupportsCancellation == true)
-            {
-                // Cancel the asynchronous operation.
-                backgroundWorker1.CancelAsync();
-            }
-        }
-
-        // This event handler is where the time-consuming work is done.
-        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
-        {
-            BackgroundWorker worker = sender as BackgroundWorker;
-
-            MouseHandler mouseHander = new MouseHandler();
-            int i = 1;
-
-            while (true)
-            {
-                if (worker.CancellationPending == true)
-                {
-                    e.Cancel = true;
-                    break;
-                }
-                else
-                {
-                    //INSERT TIME CONSUMING TASK HERE
-
-                    // Perform a time consuming operation and report progress.
-                    System.Threading.Thread.Sleep(10);
-                    worker.ReportProgress(i);
-                }
-            }
-        }
-
-        // This event handler updates the progress.
-        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            //resultLabel.Text = (e.ProgressPercentage.ToString() + "%");
-        }
-
-        // This event handler deals with the results of the background operation.
-        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            /*
-            if (e.Cancelled == true)
-            {
-                resultLabel.Text = "Cancelled!";
-            }
-            else if (e.Error != null)
-            {
-                resultLabel.Text = "Error: " + e.Error.Message;
-            }
-            else
-            {
-                resultLabel.Text = "Done!";
-            }
-            */
-        }
+        }        
     }
 }
